@@ -11,7 +11,7 @@ export default props => {
             props.setPage(0);
           }}
         >
-          Restaurant Booking App
+          Table Booking App
         </NavbarBrand>
       </Navbar>
     </div>

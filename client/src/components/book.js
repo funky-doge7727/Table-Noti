@@ -45,30 +45,14 @@ export default props => {
     email: ""
   });
 
-  // List of potential locations
-  const [locations] = useState(["Any Location", "Patio", "Inside", "Bar"]);
-  const [times] = useState([
-    "9AM",
-  ]);
-  // Basic reservation "validation"
-  const [reservationError, setReservationError] = useState(false);
+  // Handle User Logout
 
-  const getDate = _ => {
-    const months = [
-      "January",
-    ];
-    const date =
-      months[selection.date.getMonth()] +
-      " " +
-      selection.date.getDate() +
-      " " +
-      selection.date.getFullYear();
-    let time = selection.time.slice(0, -2);
-    time = selection.time > 12 ? time + 12 + ":00" : time + ":00";
-    console.log(time);
-    const datetime = new Date(date + " " + time);
-    return datetime;
-  };
+  const handleClickLogout = () => {
+    if (localStorage.getItem('token')) {
+      localStorage.removeItem('token');
+      props.setPage(0)
+    }
+  }
 
   const getEmptyTables = _ => {
     // let tables = totalTables.filter(table => table.isAvailable);
@@ -79,28 +63,28 @@ export default props => {
   };
 
   useEffect(() => {
-    // Check availability of tables from DB when a date and time is selected
       (async _ => {
         let res = await fetch("http://localhost:5000/availability/findall", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem('token')}`
           }
         });
         res = await res.json();
         setTotalTables(res);
       })();
     
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totalTables]);
+  }, [selection.table.id]);
 
-  // Make the reservation if all details are filled out
+  // Make the reservation
   const reserve = async _ => {
       console.log(selection)
       let res = await fetch("http://localhost:5000/availability/changestatus", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
           tableNumber: selection.table.name,
@@ -109,9 +93,17 @@ export default props => {
       });
       res = await res.text();
       console.log("Reserved: " + res);
-      props.setPage(0);
-    
+      selection.table.id = 0
+      props.setPage(1);
+      window.location.reload()
   };
+
+  const cancelReserve = () => {
+    selection.table.id = 0
+    console.log("Cancelled reservation: " + selection.table.name)
+    props.setPage(1)
+    window.location.reload()
+  }
 
   // Clicking on a table sets the selection state
   const selectTable = (table_name, table_id) => {
@@ -124,84 +116,6 @@ export default props => {
     });
   };
 
-  // Generate party size dropdown
-  const getSizes = _ => {
-    let newSizes = [];
-
-    for (let i = 1; i < 8; i++) {
-      newSizes.push(
-        <DropdownItem
-          key={i}
-          className="booking-dropdown-item"
-          onClick={e => {
-            let newSel = {
-              ...selection,
-              table: {
-                ...selection.table
-              },
-              size: i
-            };
-            setSelection(newSel);
-          }}
-        >
-          {i}
-        </DropdownItem>
-      );
-    }
-    return newSizes;
-  };
-
-  // Generate locations dropdown
-  const getLocations = _ => {
-    let newLocations = [];
-    locations.forEach(loc => {
-      newLocations.push(
-        <DropdownItem
-          key={loc}
-          className="booking-dropdown-item"
-          onClick={_ => {
-            let newSel = {
-              ...selection,
-              table: {
-                ...selection.table
-              },
-              location: loc
-            };
-            setSelection(newSel);
-          }}
-        >
-          {loc}
-        </DropdownItem>
-      );
-    });
-    return newLocations;
-  };
-
-  // Generate locations dropdown
-  const getTimes = _ => {
-    let newTimes = [];
-    times.forEach(time => {
-      newTimes.push(
-        <DropdownItem
-          key={time}
-          className="booking-dropdown-item"
-          onClick={_ => {
-            let newSel = {
-              ...selection,
-              table: {
-                ...selection.table
-              },
-              time: time
-            };
-            setSelection(newSel);
-          }}
-        >
-          {time}
-        </DropdownItem>
-      );
-    });
-    return newTimes;
-  };
 
   // Generating tables from available tables state
   const getTables = _ => {
@@ -248,27 +162,13 @@ export default props => {
     <div>
       <Row noGutters className="text-center align-items-center pizza-cta">
         <Col>
-          <p className="looking-for-pizza">
-            {!selection.table.id ? "Book a Table" : "Confirm Reservation"}
-            <i
-              className={
-                !selection.table.id
-                  ? "fas fa-chair pizza-slice"
-                  : "fas fa-clipboard-check pizza-slice"
-              }
-            ></i>
-          </p>
+
           <p className="selected-table">
             {selection.table.id
               ? "You are going to reserve table " + selection.table.name
               : null}
           </p>
 
-          {reservationError ? (
-            <p className="reservation-error">
-              * Please fill out all of the details.
-            </p>
-          ) : null}
         </Col>
       </Row>
 
@@ -311,7 +211,7 @@ export default props => {
                   {selection.location}
                 </DropdownToggle>
                 <DropdownMenu right className="booking-dropdown-menu">
-                  {getLocations()}
+                  {()=>{}}
                 </DropdownMenu>
               </UncontrolledDropdown>
             </Col>
@@ -323,12 +223,21 @@ export default props => {
                     : selection.size.toString()}
                 </DropdownToggle>
                 <DropdownMenu right className="booking-dropdown-menu">
-                  {getSizes()}
+                  {()=>{}}
                 </DropdownMenu>
               </UncontrolledDropdown>
             </Col>
+            <Col xs="12" sm="3">
+              <Button 
+                color="none"
+                className="booking-dropdown"
+                onClick={handleClickLogout}
+              >
+                Logout
+              </Button>
+            </Col>
           </Row>
-          <Row noGutters className="tables-display">
+          <Row noGutters className="tables-display" >
             <Col>
               {getEmptyTables() > 0 ? (
                 <p className="available-tables">{getEmptyTables()} available</p>
@@ -371,16 +280,15 @@ export default props => {
               >
                 Reserve
               </Button>
-              <Button variant="primary" onClick={handleShow}> Open BootStrap </Button>
-              <Modal show={false} >
-                <ModalHeader>Modal Head Part</ModalHeader>
-                <ModalBody>
-                  Hi, React modal is here
-                </ModalBody>
-                <ModalFooter>
-                  Close Modal
-                </ModalFooter>
-              </Modal>
+              <Button
+                color="none"
+                className="book-table-btn"
+                onClick={_ => {
+                  cancelReserve();
+                }}
+              >
+                Cancel
+              </Button>
 
             </Col>
           </Row>

@@ -8,13 +8,13 @@ const Table = require("../models/tables").model;
 
 const seedData = require("../models/seed")
 
-const jwtauthenticate = passport.authenticate('jwt', { session: false })
-
 //// NOT REST COMPLIANT YET!!
 
 // (post) seed data route
 
-router.post("/seed", passport.authenticate('jwt', { session: false }), async function (req, res) { 
+router.use(passport.authenticate('jwt', { session: false }))
+
+router.post("/seed", async function (req, res) { 
   // Seed data for tables
     db.dropCollection("tables", () => console.log("collection dropped"))
     await Table.create(seedData, (e, m) => e ? e.message : console.log("seed data created"))

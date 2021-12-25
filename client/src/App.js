@@ -1,19 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-import Main from "./components/main";
-import Book from "./components/book";
-import ModifyTable from "./components/modifytable";
-import Navbar from "./components/navbar";
+import Main from "./components/main"
+import Book from "./components/book"
+import ModifyTable from "./components/modifytable"
+import Navbar from "./components/navbar"
 
 export default _ => {
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(0)
+  
+  useEffect(() => {
+    setPage(JSON.parse(localStorage.getItem('page')))
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('page', page)
+  }, [page]);
 
   return (
     <div>
-      <Navbar setPage={setPage} />
-      {page === 0 ? <Main setPage={setPage} /> : null}
-      {page === 1 ? <Book setPage={setPage} /> : null}
-      {page === 2 ? <ModifyTable /> : null}
+      {!page && <Main setPage={setPage} />}
+      {(page === 1 && localStorage.getItem('token')) ? <Book setPage={setPage} /> : null }
+      {page === 2 && <ModifyTable />}
     </div>
   );
 };
