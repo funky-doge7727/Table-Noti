@@ -1,30 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
+import io from 'socket.io-client'
+import useDeepCompareEffect from 'use-deep-compare-effect'
 import {
   Row,
   Col,
-  UncontrolledDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-  Input,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
+  Navbar,
+  NavbarBrand,
   Button
 } from "reactstrap";
 
-import Modal from "reactstrap/lib/Modal";
-
 import Table from "./table";
 
+
+
 export default props => {
+  const socketRef = useRef()
+
+
   const [totalTables, setTotalTables] = useState([]);
-
-
-  const [show, setShow] = useState(false)
-
-  const handleClose = () => setShow(false)
-  const handleShow = () => setShow(true)
 
   // User's selections
   const [selection, setSelection] = useState({
@@ -32,18 +25,8 @@ export default props => {
       name: null,
       id: null
     },
-    date: new Date(),
-    time: null,
-    location: "Any Location",
-    size: 0
   });
 
-  // User's booking details
-  const [booking, setBooking] = useState({
-    name: "",
-    phone: "",
-    email: ""
-  });
 
   // Handle User Logout
 
@@ -62,20 +45,29 @@ export default props => {
     return count;
   };
 
-  useEffect(() => {
-      (async _ => {
-        let res = await fetch("http://localhost:5000/availability/findall", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        res = await res.json();
-        setTotalTables(res);
-      })();
-    
-  }, [selection.table.id]);
+  const apiCallFunction = async _ => {
+    let res = await fetch("http://localhost:5000/availability/findall", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem('token')}` 
+      }
+    });
+    res = await res.json();
+    setTotalTables(res);
+  };
+
+  // check table availability
+
+  useDeepCompareEffect(() => {
+      socketRef.current = io.connect("http://localhost:5000")
+      socketRef.current.on("apiCall", ({ apiCall }) => {
+        apiCallFunction()
+			})
+      apiCallFunction()
+			return () => socketRef.current.disconnect()
+
+  }, [totalTables]);
 
   // Make the reservation
   const reserve = async _ => {
@@ -159,7 +151,12 @@ export default props => {
   };
 
   return (
-    <div>
+
+       <div>
+          <NavbarBrand className="nav-brand justify-content-center">
+            Table Booking App - Reservation Menu
+          </NavbarBrand>
+
       <Row noGutters className="text-center align-items-center pizza-cta">
         <Col>
 
@@ -175,57 +172,20 @@ export default props => {
       {!selection.table.id ? (
         <div id="reservation-stuff">
           <Row noGutters className="text-center align-items-center">
+
+
+            <Navbar color="light" light expand="md">
+
+      </Navbar>
             <Col xs="12" sm="3">
-              <input
-                type="date"
-                required="required"
-                className="booking-dropdown"
-                value={selection.date.toISOString().split("T")[0]}
-                onChange={e => {
-                  if (!isNaN(new Date(new Date(e.target.value)))) {
-                    let newSel = {
-                      ...selection,
-                      table: {
-                        ...selection.table
-                      },
-                      date: new Date(e.target.value)
-                    };
-                    setSelection(newSel);
-                  } else {
-                    console.log("Invalid date");
-                    let newSel = {
-                      ...selection,
-                      table: {
-                        ...selection.table
-                      },
-                      date: new Date()
-                    };
-                    setSelection(newSel);
-                  }
-                }}
-              ></input>
-            </Col>
-            <Col xs="12" sm="3">
-              <UncontrolledDropdown>
-                <DropdownToggle color="none" caret className="booking-dropdown">
-                  {selection.location}
-                </DropdownToggle>
-                <DropdownMenu right className="booking-dropdown-menu">
-                  {()=>{}}
-                </DropdownMenu>
-              </UncontrolledDropdown>
-            </Col>
-            <Col xs="12" sm="3">
-              <UncontrolledDropdown>
-                <DropdownToggle color="none" caret className="booking-dropdown">
-                  {selection.size === 0
-                    ? "Select a Party Size"
-                    : selection.size.toString()}
-                </DropdownToggle>
-                <DropdownMenu right className="booking-dropdown-menu">
-                  {()=>{}}
-                </DropdownMenu>
-              </UncontrolledDropdown>
+                <Button 
+                  color="none"
+                  className="booking-dropdown"
+                  onClick={() => props.setPage(2)}
+                  setPage={props.setPage}
+                >
+                  Table Management
+                </Button>
             </Col>
             <Col xs="12" sm="3">
               <Button 

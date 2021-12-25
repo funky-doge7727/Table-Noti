@@ -18,6 +18,8 @@ router.post("/seed", async function (req, res) {
   // Seed data for tables
     db.dropCollection("tables", () => console.log("collection dropped"))
     await Table.create(seedData, (e, m) => e ? e.message : console.log("seed data created"))
+    const io = req.app.get('socketio')
+    io.emit('apiCall', {apiCall: 'random'})
     res.send("seed data created")
 });
 
@@ -44,6 +46,8 @@ router.post("/createone", async function (req, res) {
     capacity = Number (capacity)
     const newData = { tableNumber: tableNumber, capacity: capacity, status: "unoccupied" }
     await Table.create(newData, (e, m) => e ? e.message : console.log("new table created"))
+    const io = req.app.get('socketio')
+    io.emit('apiCall', {apiCall: 'random'})
     res.json(newData)
 })
 
@@ -55,6 +59,8 @@ router.post("/updateone", async function (req, res) {
     table.capacity = req.body.newCapacity
     console.log(table)
     await Table.updateOne({ tableNumber: Number(req.body.tableNumber)}, table).exec()
+    const io = req.app.get('socketio')
+    io.emit('apiCall', {apiCall: 'random'})
     res.json(table)
 })
 
@@ -62,7 +68,9 @@ router.post("/updateone", async function (req, res) {
 
 router.post("/deleteone", async function (req, res) {
     await Table.deleteOne({ tableNumber: Number(req.body.tableNumber) }).exec()
-    res.send(`deleted table ${req.body.tableNumber}`)
+    const io = req.app.get('socketio')
+    io.emit('apiCall', {apiCall: 'random'})
+    res.json(`deleted table ${req.body.tableNumber}`)
 })
 
 // post route for status change
@@ -75,19 +83,19 @@ router.post("/changestatus", async function (req, res) {
         if (req.body.buttonClick === true) {
             updateTo = 'awaiting party'
         } else {
-            res.send('cannot change from "unoccupied" to "awaiting party" with sensor')
+            res.status(405).send('cannot change from "unoccupied" to "awaiting party" with sensor')
             return
         }
     } else if (table.status === 'awaiting party') {
         if (req.body.buttonClick === true) {
-            res.send('cannot change from "awaiting party" to "occupied" with the "reserve" button. Must use IOT.')
+            res.status(405).send('cannot change from "awaiting party" to "occupied" with the "reserve" button. Must use IOT.')
             return
         } else {
             updateTo = 'occupied'
         }  
     } else if (table.status === 'occupied') {
         if (req.body.buttonClick === true) {
-            res.send('cannot change from "occupied" to "unoccupied" with the "reserve" button. Must use IOT.')
+            res.status(405).send('cannot change from "occupied" to "unoccupied" with the "reserve" button. Must use IOT.')
             return
         } else {
             updateTo = 'unoccupied'
@@ -95,8 +103,9 @@ router.post("/changestatus", async function (req, res) {
     }
 
     await Table.updateOne({tableNumber: Number(req.body.tableNumber)}, {status: updateTo}).exec()
-    table.changeRequest = true
     table.status = updateTo
+    const io = req.app.get('socketio')
+    io.emit('apiCall', {apiCall: 'random'})
     res.send(table)
 })
 

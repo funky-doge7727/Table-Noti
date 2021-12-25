@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import io from 'socket.io-client'
+import useDeepCompareEffect from 'use-deep-compare-effect'
 import {
   Row,
   Col,
@@ -10,14 +12,20 @@ import {
   ModalBody,
   ModalFooter,
   ModalHeader,
+  Navbar,
+  NavbarBrand,
   Button
 } from "reactstrap";
 
-import Modal from "reactstrap/lib/Modal";
-
 import Table from "./table";
 
+
+
 export default props => {
+  const socketRef = useRef()
+
+  // console.log(socketRef)
+
   const [totalTables, setTotalTables] = useState([]);
 
 
@@ -32,10 +40,6 @@ export default props => {
       name: null,
       id: null
     },
-    date: new Date(),
-    time: null,
-    location: "Any Location",
-    size: 0
   });
 
   // User's booking details
@@ -62,29 +66,38 @@ export default props => {
     return count;
   };
 
-  useEffect(() => {
-    // Check availability of tables from DB when a date and time is selected
-      (async _ => {
-        let res = await fetch("http://localhost:5000/availability/findall", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          }
-        });
-        res = await res.json();
-        setTotalTables(res);
-      })();
-    
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const apiCallFunction = async _ => {
+    let res = await fetch("http://localhost:5000/availability/findall", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem('token')}` 
+      }
+    });
+    res = await res.json();
+    setTotalTables(res);
+  };
 
-  // Make the reservation if all details are filled out
+  // check table availability
+
+  useDeepCompareEffect(() => {
+      socketRef.current = io.connect("http://localhost:5000")
+      socketRef.current.on("apiCall", ({ apiCall }) => {
+        apiCallFunction()
+			})
+      apiCallFunction()
+			return () => socketRef.current.disconnect()
+
+  }, [totalTables]);
+
+  // Make the reservation
   const reserve = async _ => {
       console.log(selection)
       let res = await fetch("http://localhost:5000/availability/changestatus", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
           tableNumber: selection.table.name,
@@ -93,9 +106,17 @@ export default props => {
       });
       res = await res.text();
       console.log("Reserved: " + res);
-      props.setPage(0);
-    
+      selection.table.id = 0
+      props.setPage(1);
+      window.location.reload()
   };
+
+  const cancelReserve = () => {
+    selection.table.id = 0
+    console.log("Cancelled reservation: " + selection.table.name)
+    props.setPage(1)
+    window.location.reload()
+  }
 
   // Clicking on a table sets the selection state
   const selectTable = (table_name, table_id) => {
@@ -151,13 +172,15 @@ export default props => {
   };
 
   return (
-    <div>
+
+       <div>
+          <NavbarBrand className="nav-brand justify-content-center">
+            Table Booking App - Reservation Menu
+          </NavbarBrand>
+
       <Row noGutters className="text-center align-items-center pizza-cta">
         <Col>
-          <p className="looking-for-pizza">
-            {!selection.table.id ? "Book a Table" : "Confirm Reservation"}
 
-          </p>
           <p className="selected-table">
             {selection.table.id
               ? "You are going to reserve table " + selection.table.name
@@ -170,57 +193,20 @@ export default props => {
       {!selection.table.id ? (
         <div id="reservation-stuff">
           <Row noGutters className="text-center align-items-center">
+
+
+            <Navbar color="light" light expand="md">
+
+      </Navbar>
             <Col xs="12" sm="3">
-              <input
-                type="date"
-                required="required"
-                className="booking-dropdown"
-                value={selection.date.toISOString().split("T")[0]}
-                onChange={e => {
-                  if (!isNaN(new Date(new Date(e.target.value)))) {
-                    let newSel = {
-                      ...selection,
-                      table: {
-                        ...selection.table
-                      },
-                      date: new Date(e.target.value)
-                    };
-                    setSelection(newSel);
-                  } else {
-                    console.log("Invalid date");
-                    let newSel = {
-                      ...selection,
-                      table: {
-                        ...selection.table
-                      },
-                      date: new Date()
-                    };
-                    setSelection(newSel);
-                  }
-                }}
-              ></input>
-            </Col>
-            <Col xs="12" sm="3">
-              <UncontrolledDropdown>
-                <DropdownToggle color="none" caret className="booking-dropdown">
-                  {selection.location}
-                </DropdownToggle>
-                <DropdownMenu right className="booking-dropdown-menu">
-                  {()=>{}}
-                </DropdownMenu>
-              </UncontrolledDropdown>
-            </Col>
-            <Col xs="12" sm="3">
-              <UncontrolledDropdown>
-                <DropdownToggle color="none" caret className="booking-dropdown">
-                  {selection.size === 0
-                    ? "Select a Party Size"
-                    : selection.size.toString()}
-                </DropdownToggle>
-                <DropdownMenu right className="booking-dropdown-menu">
-                  {()=>{}}
-                </DropdownMenu>
-              </UncontrolledDropdown>
+                <Button 
+                  color="none"
+                  className="booking-dropdown"
+                  onClick={() => props.setPage(2)}
+                  setPage={props.setPage}
+                >
+                  Table Management
+                </Button>
             </Col>
             <Col xs="12" sm="3">
               <Button 
@@ -232,7 +218,7 @@ export default props => {
               </Button>
             </Col>
           </Row>
-          <Row noGutters className="tables-display">
+          <Row noGutters className="tables-display" >
             <Col>
               {getEmptyTables() > 0 ? (
                 <p className="available-tables">{getEmptyTables()} available</p>
@@ -275,16 +261,15 @@ export default props => {
               >
                 Reserve
               </Button>
-              <Button variant="primary" onClick={handleShow}> Open BootStrap </Button>
-              <Modal show={false} >
-                <ModalHeader>Modal Head Part</ModalHeader>
-                <ModalBody>
-                  Hi, React modal is here
-                </ModalBody>
-                <ModalFooter>
-                  Close Modal
-                </ModalFooter>
-              </Modal>
+              <Button
+                color="none"
+                className="book-table-btn"
+                onClick={_ => {
+                  cancelReserve();
+                }}
+              >
+                Cancel
+              </Button>
 
             </Col>
           </Row>

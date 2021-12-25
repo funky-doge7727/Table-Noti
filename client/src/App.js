@@ -20,7 +20,7 @@ export default _ => {
     <div>
       {!page && <Main setPage={setPage} />}
       {(page === 1 && localStorage.getItem('token')) ? <Book setPage={setPage} /> : null }
-      {page === 2 && <ModifyTable />}
+      {(page === 2 && localStorage.getItem('token')) ? <ModifyTable setPage={setPage} /> : null}
     </div>
   );
 };
