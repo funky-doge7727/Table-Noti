@@ -178,7 +178,7 @@ export default props => {
                 }`
             },
             body: JSON.stringify(
-                {tableNumber: Number(updateTableNumber), capacity: Number(updateTableCapacity), status: updateTableStatus}
+                {tableNumber: selection.table.name, newTableNumber: Number(updateTableNumber), capacity: Number(updateTableCapacity), status: updateTableStatus}
             )
         });
         res = await res.json()

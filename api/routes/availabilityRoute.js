@@ -54,12 +54,13 @@ router.post("/createone", async function (req, res) {
 // update route
 
 router.post("/updateone", async function (req, res) {
-    const table = await Table.findOne({ tableNumber: Number(req.body.tableNumber) }).exec()
-    table.tableNumber = req.body.tableNumber
-    table.capacity = req.body.capacity
-    table.status = req.body.status
+    const {tableNumber, newTableNumber, capacity, status} = req.body
+    const table = await Table.findOne({ tableNumber: Number(tableNumber) }).exec()
+    table.tableNumber = newTableNumber
+    table.capacity = capacity
+    table.status = status
     console.log(table)
-    await Table.updateOne({ tableNumber: Number(req.body.tableNumber)}, table).exec()
+    await Table.updateOne({ tableNumber: Number(tableNumber)}, table).exec()
     const io = req.app.get('socketio')
     io.emit('apiCall', {apiCall: 'random'})
     res.json(table)
