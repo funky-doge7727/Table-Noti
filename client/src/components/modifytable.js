@@ -26,8 +26,22 @@ export default props => {
     }
 
     const [totalTables, setTotalTables] = useState([])
-    const [oneTable, setOneTable] = useState({}) // for editing purposes
+    // const [oneTable, setOneTable] = useState({}) // for editing purposes
+    const [oneTableToEdit, setOneTableToEdit] = useState([])
     const [show, setShow] = useState(false)
+
+    const oneTable = () => {
+        totalTables.forEach((obj, index) => {
+            if (obj.tableNumber === selection.table.name) {
+                const result = [obj.tableNumber, obj.capacity, obj.status]
+                // TO ASK
+                console.log(result)
+                setOneTableToEdit(result)
+                console.log(oneTableToEdit)
+                return result
+            }
+        })
+    }
 
     // prompts for modals
     const [addTableSuccessful, setAddTableSuccessful] = useState(false)
@@ -75,6 +89,7 @@ export default props => {
         });
         res = await res.json();
         setTotalTables(res);
+        console.log(totalTables)
     }
 
     const callOneTable = async _ => {
@@ -269,6 +284,7 @@ export default props => {
     }
 
     useEffect(() => {
+        oneTable()
         editTableState === 3 && selection.table.id && setDeleteTable(true)
         if (editTableState === 2 && selection.table.id) {
             setEditTable(true)
@@ -454,7 +470,7 @@ export default props => {
         }
 
             <div id="confirm-reservation-stuff">
-
+                
                 <Modal show={editTable}
                     onHide={
                         () => setEditTable(false)
@@ -462,11 +478,10 @@ export default props => {
                     <Modal.Header closeButton>
                         <Modal.Title>Add table successful</Modal.Title>
                     </Modal.Header>
-
                     <form ref={formRef}>
-                        <h2>Edit details of table below</h2>
+                        <h2>Edit details of table below </h2>
                         <label for="tableNumber">Table Number</label>
-                        <input type="text" name="tableNumber"
+                        <input type="text" name="tableNumber" 
                             onChange={handleUpdateTableNumber}/>
                         <br/>
                         <label for="capacity">Capacity</label>
@@ -474,7 +489,7 @@ export default props => {
                             onChange={handleUpdateTableCapacity}/>
                         <br/>
                         <label for="status">Status</label>
-                        <select defaultValue="occupied" name="status" onChange={handleUpdateTableStatus}>
+                        <select name="status" onChange={handleUpdateTableStatus}>
                             <option value=""></option>
                             <option value="unoccupied">Unoccupied</option>
                             <option value="awaiting party">Awaiting Party</option>
