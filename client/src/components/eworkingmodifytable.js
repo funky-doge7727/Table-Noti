@@ -18,6 +18,7 @@ export default props => {
     const socketRef = useRef()
     const formRef = useRef()
 
+    const backEndDomain = process.env.REACT_APP_BACK_END_DOMAIN || "http://localhost:5000"
     const defaultTable = {
         table: {
             name: null,
@@ -26,8 +27,22 @@ export default props => {
     }
 
     const [totalTables, setTotalTables] = useState([])
-    const [oneTable, setOneTable] = useState({}) // for editing purposes
+    // const [oneTable, setOneTable] = useState({}) // for editing purposes
+    const [oneTableToEdit, setOneTableToEdit] = useState([])
     const [show, setShow] = useState(false)
+
+    const oneTable = () => {
+        totalTables.forEach((obj, index) => {
+            if (obj.tableNumber === selection.table.name) {
+                const result = [obj.tableNumber, obj.capacity, obj.status]
+                // TO ASK
+                console.log(result)
+                setOneTableToEdit(result)
+                console.log(oneTableToEdit)
+                return result
+            }
+        })
+    }
 
     // prompts for modals
     const [addTableSuccessful, setAddTableSuccessful] = useState(false)
@@ -64,7 +79,7 @@ export default props => {
     };
 
     const apiCallFunction = async _ => {
-        let res = await fetch("http://localhost:5000/availability/findall", {
+        let res = await fetch(`${backEndDomain}/availability/findall`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -75,10 +90,11 @@ export default props => {
         });
         res = await res.json();
         setTotalTables(res);
+        console.log(totalTables)
     }
 
     const callOneTable = async _ => {
-        let res = await fetch("http://localhost:5000/availability/findone", {
+        let res = await fetch(`${backEndDomain}/availability/findone`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -98,7 +114,7 @@ export default props => {
     // check table availability
 
     useDeepCompareEffect(() => {
-        socketRef.current = io.connect("http://localhost:5000")
+        socketRef.current = io.connect(backEndDomain)
         socketRef.current.on("apiCall", ({apiCall}) => {
             apiCallFunction()
         })
@@ -138,7 +154,7 @@ export default props => {
 
     const handleAddTable = async (e) => {
         e.preventDefault()
-        let res = await fetch("http://localhost:5000/availability/createone", {
+        let res = await fetch(`${backEndDomain}/availability/createone`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -169,7 +185,7 @@ export default props => {
 
     const handleUpdateTable = async (e) => {
         e.preventDefault()
-        let res = await fetch("http://localhost:5000/availability/updateone", {
+        let res = await fetch(`${backEndDomain}/availability/updateone`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -188,7 +204,7 @@ export default props => {
 
     const handleDeleteTable = async (e) => {
         e.preventDefault()
-        let res = await fetch("http://localhost:5000/availability/deleteone", {
+        let res = await fetch(`${backEndDomain}/availability/deleteone`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -269,6 +285,7 @@ export default props => {
     }
 
     useEffect(() => {
+        oneTable()
         editTableState === 3 && selection.table.id && setDeleteTable(true)
         if (editTableState === 2 && selection.table.id) {
             setEditTable(true)
@@ -454,19 +471,18 @@ export default props => {
         }
 
             <div id="confirm-reservation-stuff">
-
+                
                 <Modal show={editTable}
                     onHide={
                         () => setEditTable(false)
                 }>
                     <Modal.Header closeButton>
-                        <Modal.Title>Add table successful</Modal.Title>
+                        <Modal.Title>Edit table information</Modal.Title>
                     </Modal.Header>
-
                     <form ref={formRef}>
-                        <h2>Edit details of table below</h2>
+                        <h2>Edit details of existing table {selection.table.name} below </h2>
                         <label for="tableNumber">Table Number</label>
-                        <input type="text" name="tableNumber"
+                        <input type="text" name="tableNumber" 
                             onChange={handleUpdateTableNumber}/>
                         <br/>
                         <label for="capacity">Capacity</label>
@@ -474,7 +490,7 @@ export default props => {
                             onChange={handleUpdateTableCapacity}/>
                         <br/>
                         <label for="status">Status</label>
-                        <select defaultValue="occupied" name="status" onChange={handleUpdateTableStatus}>
+                        <select name="status" onChange={handleUpdateTableStatus}>
                             <option value=""></option>
                             <option value="unoccupied">Unoccupied</option>
                             <option value="awaiting party">Awaiting Party</option>

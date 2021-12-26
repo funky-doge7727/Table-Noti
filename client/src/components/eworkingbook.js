@@ -16,11 +16,9 @@ import Table from "./table"
 
 export default props => {
     const socketRef = useRef()
-
-
     const [totalTables, setTotalTables] = useState([])
     const [show, setShow] = useState(false)
-
+    const backEndDomain = process.env.REACT_APP_BACK_END_DOMAIN || "http://localhost:5000"
 
     // User's selections
     const [selection, setSelection] = useState({
@@ -56,7 +54,7 @@ export default props => {
     };
 
     const apiCallFunction = async _ => {
-        let res = await fetch("http://localhost:5000/availability/findall", {
+        let res = await fetch(`${backEndDomain}/availability/findall`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -74,7 +72,7 @@ export default props => {
     // check table availability
 
     useDeepCompareEffect(() => {
-        socketRef.current = io.connect("http://localhost:5000")
+        socketRef.current = io.connect(backEndDomain)
         socketRef.current.on("apiCall", ({apiCall}) => {
             apiCallFunction()
         })
@@ -86,7 +84,7 @@ export default props => {
     // Make the reservation
     const reserve = async _ => {
         console.log(selection)
-        let res = await fetch("http://localhost:5000/availability/changestatus", {
+        let res = await fetch(`${backEndDomain}/availability/changestatus`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

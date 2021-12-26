@@ -18,6 +18,7 @@ export default props => {
     const socketRef = useRef()
     const formRef = useRef()
 
+    const backEndDomain = process.env.REACT_APP_BACK_END_DOMAIN || "http://localhost:5000"
     const defaultTable = {
         table: {
             name: null,
@@ -78,7 +79,7 @@ export default props => {
     };
 
     const apiCallFunction = async _ => {
-        let res = await fetch("http://localhost:5000/availability/findall", {
+        let res = await fetch(`${backEndDomain}/availability/findall`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -93,7 +94,7 @@ export default props => {
     }
 
     const callOneTable = async _ => {
-        let res = await fetch("http://localhost:5000/availability/findone", {
+        let res = await fetch(`${backEndDomain}/availability/findone`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -113,7 +114,7 @@ export default props => {
     // check table availability
 
     useDeepCompareEffect(() => {
-        socketRef.current = io.connect("http://localhost:5000")
+        socketRef.current = io.connect(backEndDomain)
         socketRef.current.on("apiCall", ({apiCall}) => {
             apiCallFunction()
         })
@@ -153,7 +154,7 @@ export default props => {
 
     const handleAddTable = async (e) => {
         e.preventDefault()
-        let res = await fetch("http://localhost:5000/availability/createone", {
+        let res = await fetch(`${backEndDomain}/availability/createone`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -184,7 +185,7 @@ export default props => {
 
     const handleUpdateTable = async (e) => {
         e.preventDefault()
-        let res = await fetch("http://localhost:5000/availability/updateone", {
+        let res = await fetch(`${backEndDomain}/availability/updateone`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -203,7 +204,7 @@ export default props => {
 
     const handleDeleteTable = async (e) => {
         e.preventDefault()
-        let res = await fetch("http://localhost:5000/availability/deleteone", {
+        let res = await fetch(`${backEndDomain}/availability/deleteone`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -476,10 +477,10 @@ export default props => {
                         () => setEditTable(false)
                 }>
                     <Modal.Header closeButton>
-                        <Modal.Title>Add table successful</Modal.Title>
+                        <Modal.Title>Edit table information</Modal.Title>
                     </Modal.Header>
                     <form ref={formRef}>
-                        <h2>Edit details of table below </h2>
+                        <h2>Edit details of existing table {selection.table.name} below </h2>
                         <label for="tableNumber">Table Number</label>
                         <input type="text" name="tableNumber" 
                             onChange={handleUpdateTableNumber}/>

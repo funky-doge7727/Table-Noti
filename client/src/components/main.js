@@ -4,6 +4,7 @@ import {Row, Col, Button} from "reactstrap";
 export default props => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const backEndDomain = "http://localhost:5000"
   
     const handleUsernameChange = (e) => {
       setUsername(e.target.value);
@@ -14,7 +15,7 @@ export default props => {
     }
   
     const handleClickLogin = async () => {
-      const response = await fetch("http://localhost:5000/user/signin", {
+      const response = await fetch(`${backEndDomain}/user/signin`, {
         method: "POST",
         headers: {
           "content-type": "application/json"
