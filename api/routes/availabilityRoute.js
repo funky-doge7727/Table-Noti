@@ -55,8 +55,9 @@ router.post("/createone", async function (req, res) {
 
 router.post("/updateone", async function (req, res) {
     const table = await Table.findOne({ tableNumber: Number(req.body.tableNumber) }).exec()
-    table.tableNumber = req.body.newTableNumber
-    table.capacity = req.body.newCapacity
+    table.tableNumber = req.body.tableNumber
+    table.capacity = req.body.capacity
+    table.status = req.body.status
     console.log(table)
     await Table.updateOne({ tableNumber: Number(req.body.tableNumber)}, table).exec()
     const io = req.app.get('socketio')

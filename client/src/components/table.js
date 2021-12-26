@@ -30,11 +30,11 @@ export default props => {
   return (
     <div className="table-container">
       <Col
-        className={props.empty ? "table selectable-table" : "table"}
+        className={(!props.empty && props.forReserve) ? "table" :"table selectable-table"}
         onClick={_ => {
           props.empty
-            ? props.selectTable(props.name, props.id)
-            : console.log("Tried to select a full table");
+            ? props.selectTable(props.name, props.id, true)
+            : props.selectTable(props.name, props.id, false)
         }}
       >
         <Row noGutters className="table-row">
