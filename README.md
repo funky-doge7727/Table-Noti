@@ -15,22 +15,22 @@ The application was developed using the following tech stack:
 - JWT Authentication
 - Socket.io
 
-## Logic of app operation
+# Logic of app operation
 
 - A default table status is "unoccupied" when there are no customers occupied at the table.
 
-# Dashboard page
+## Dashboard page
 - When customers visit the restaurant, the storefront staff will bring them into the store and bring them to their table. 
 - Prior to bringing the customers to their tables, the storefront staff needs to reserve the table by changing a specific table's status from "unoccupied" to "awaiting party".
 - Once the customers have settled down at their tables, the table status will automatically update to “Occupied” by way of "IOT" sensor (currently simulated by PostMan's POST request).
 - Once the customers have finished the food and the tables have been cleared, the status of the tables will be reset to "Unoccupied" by way of "IOT" sensor.
 - For the avoidance of doubt, status changes that require "IOT" sensors cannot be directly changed from the app's table reservation function. To do a backend manual adjustment on the said statuses, the storefront staff will have to launch the "table management" page and edit the status as elaborated in the section below. 
 
-# Table Management page
+## Table Management page
 - Storefront staff can (1) add, (2) delete and (3) edit tables as required with the table management page.
 - Tables are labelled by table number. When adding or editing tables, the storefront staff needs to note that each table number is unique (i.e. there can be no 2 or more tables of the same table number).
 
-## Structure of Web Application
+# Structure of Web Application
 
 The key features of the application are as follow:
 
