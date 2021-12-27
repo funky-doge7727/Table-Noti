@@ -5,13 +5,13 @@ import {
     Row,
     Col,
     Navbar,
-    NavbarBrand,
     Button 
 } from "reactstrap"
 
 import {Modal} from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Table from "./table"
+import Table from "./Table"
+import Logo from  "./Logo"
 
 
 export default props => {
@@ -190,15 +190,13 @@ export default props => {
 
     return (
         <div>
-            <NavbarBrand className="nav-brand justify-content-center">
-                Table Booking App - Reservation Menu
-            </NavbarBrand>
 
+            <Logo></Logo>
             <Row noGutters className="text-center align-items-center">
 
                 <Navbar color="light" light expand="md"></Navbar>
                 <Col xs="12" sm="3">
-                    <Button color="none" className="booking-dropdown"
+                    <Button color="none" className="button-general toggle-menu"
                         onClick={
                             () => props.setPage(2)
                         }
@@ -209,16 +207,16 @@ export default props => {
                     </Button>
                 </Col>
                 <Col xs="12" sm="3">
-                    <Button color="none" className="booking-dropdown"
+                    <Button color="none" className="button-general"
                         onClick={handleClickLogout}>
                         Logout
                     </Button>
                 </Col>
             </Row>
 
-                            <div id="reservation-stuff">
+                            <div>
 
-                    <Row noGutters className="tables-display">
+                    <Row noGutters className="display-tables">
                         <Col> {
                             getEmptyTables() > 0 ? (
                                 <p className="available-tables">
@@ -232,14 +230,14 @@ export default props => {
                             {
                             getEmptyTables() > 0 ? (
                                 <div>
-                                    <div className="table-key">
-                                        <span className="empty-table"></span>
+                                    <div className="table-legend">
+                                        <span className="occupied-table"></span>
                                         &nbsp; Unoccupied
                                                               &nbsp;&nbsp;
                                         <span className="awaiting-table"></span>
                                         &nbsp; Awaiting party
                                                               &nbsp;&nbsp;
-                                        <span className="full-table"></span>
+                                        <span className="unoccupied-table"></span>
                                         &nbsp; Occupied
                                                               &nbsp;&nbsp;
                                     </div>
@@ -255,7 +253,7 @@ export default props => {
                     </Row>
                 </div>
 
-                <div id="confirm-reservation-stuff">
+                <div>
                     <Modal show={show}
                         onHide={handleClose}>
                         <Modal.Header closeButton>

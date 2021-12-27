@@ -58,10 +58,16 @@ router.post("/createone", async function (req, res) {
 router.post("/updateone", async function (req, res) {
     const {tableNumber, newTableNumber, capacity, status} = req.body
     const table = await Table.findOne({ tableNumber: tableNumber }).exec()
+    // console.log(table)
     if (newTableNumber !== table.tableNumber) {
         table.tableNumber = newTableNumber || table.tableNumber 
     } else {
         delete table.tableNumber
+    }
+    if (!req.body.capacity && !req.body.status && !req.body.newTableNumber) {
+        res.json('no edits made')
+        console.log('no edits made')
+        return
     }
     table.capacity = capacity || table.capacity
     table.status = status || table.status

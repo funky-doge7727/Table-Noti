@@ -8,7 +8,7 @@ export default props => {
       chairs.push(
         <span
           key={i}
-          className={props.empty ? "empty-table" : props.awaiting ? "awaiting-table" : "full-table"}
+          className={props.empty ? "occupied-table" : props.awaiting ? "awaiting-table" : "unoccupied-table"}
         ></span>
       );
     }
@@ -20,7 +20,7 @@ export default props => {
       chairs2.push(
         <span
           key={i}
-          className={props.empty ? "empty-table" : props.awaiting ? "awaiting-table" : "full-table"}
+          className={props.empty ? "occupied-table" : props.awaiting ? "awaiting-table" : "unoccupied-table"}
         ></span>
       );
     }

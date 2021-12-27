@@ -11,7 +11,7 @@ import {
 
 import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Table from "./table"
+import Table from "./Table"
 
 
 export default props => {
@@ -28,14 +28,12 @@ export default props => {
 
     const [totalTables, setTotalTables] = useState([])
     const [oneTableToEdit, setOneTableToEdit] = useState([])
-    const [show, setShow] = useState(false)
 
     const oneTable = async () => {
         await totalTables.forEach((obj, index) => {
             if (obj.tableNumber === selection.table.name) {
                 const result = [obj.tableNumber, obj.capacity, obj.status]
                 setOneTableToEdit(result)
-                return result
             }
         })
     }
@@ -105,13 +103,13 @@ export default props => {
     const [editTableState, setEditTableState] = useState(0)
 
     // for add function
-    const [addTableNumber, setAddTableNumber] = useState()
-    const [tableCapacityChange, setTableCapacityChange] = useState()
+    const [addTableNumber, setAddTableNumber] = useState(0)
+    const [tableCapacityChange, setTableCapacityChange] = useState(0)
 
     // for update function
-    const [updateTableNumber, setUpdateTableNumber] = useState()
-    const [updateTableCapacity, setUpdateTableCapacity] = useState()
-    const [updateTableStatus, setUpdateTableStatus] = useState()
+    const [updateTableNumber, setUpdateTableNumber] = useState(0)
+    const [updateTableCapacity, setUpdateTableCapacity] = useState(0)
+    const [updateTableStatus, setUpdateTableStatus] = useState("")
 
     const addTableNumberChange = (e) => {
         setAddTableNumber(e.target.value);
@@ -164,6 +162,7 @@ export default props => {
     }
 
     const handleUpdateTable = async (e) => {
+        if (editTableState === 1 || editTableState === 3) return 
         e.preventDefault()
         let res = await fetch(`${backEndDomain}/availability/updateone`, {
             method: "POST",
@@ -174,7 +173,7 @@ export default props => {
                 }`
             },
             body: JSON.stringify(
-                {tableNumber: selection.table.name, newTableNumber: updateTableNumber, capacity: Number(updateTableCapacity), status: updateTableStatus}
+                {tableNumber: selection.table.name, newTableNumber: updateTableNumber, capacity: updateTableCapacity, status: updateTableStatus}
             )
         });
         if (res.ok) {
@@ -201,7 +200,7 @@ export default props => {
             },
             body: JSON.stringify(
                 {
-                    tableNumber: Number(selection.table.name)
+                    tableNumber: selection.table.name
                 }
             )
         });
@@ -272,6 +271,12 @@ export default props => {
     }
 
     useEffect(() => {
+        setUpdateTableNumber(0)
+        setUpdateTableCapacity(0)
+        setUpdateTableStatus('')
+    }, [editTable])
+
+    useEffect(() => {
         oneTable()
         editTableState === 3 && selection.table.id && setDeleteTable(true)
         if (editTableState === 2 && selection.table.id) {
@@ -291,15 +296,15 @@ export default props => {
 
     return (
         <div>
-            <NavbarBrand className="nav-brand justify-content-center">
-                Table Booking App - Table Management
+            <NavbarBrand className="nav-brand mx-auto">
+                BK Sushi Place - Table Management
             </NavbarBrand>
 
             <Row noGutters className="text-center align-items-center">
 
                 <Navbar color="light" light expand="md"></Navbar>
                 <Col xs="12" sm="3">
-                    <Button color="none" className="booking-dropdown"
+                    <Button color="none" className="button-general toggle-menu"
                         onClick={
                             () => props.setPage(1)
                         }
@@ -310,7 +315,7 @@ export default props => {
                     </Button>
                 </Col>
                 <Col xs="12" sm="3">
-                    <Button color="none" className="booking-dropdown"
+                    <Button color="none" className="button-general"
                         onClick={handleClickLogout}>
                         Logout
                     </Button>
@@ -321,12 +326,12 @@ export default props => {
                 <Navbar color="light" light expand="md"></Navbar>
 
                 <Col xs="12" sm="3">
-                    <Button color="none" className="booking-dropdown" onClick= {() => setEditTableState(1)}>
+                    <Button color="none" className="button-general add-table" onClick= {() => setEditTableState(1)}>
                         Add Table
                     </Button>
                 </Col>
                 <Col xs="12" sm="3">
-                    <Button color="none" className="booking-dropdown"
+                    <Button color="none" className="button-general edit-table"
                         onClick={
                             () => setEditTableState(2)
                     }>
@@ -334,7 +339,7 @@ export default props => {
                     </Button>
                 </Col>
                 <Col xs="12" sm="3">
-                    <Button color="none" className="booking-dropdown"
+                    <Button color="none" className="button-general"
                         onClick={
                             () => setEditTableState(3)
                         }
@@ -348,11 +353,11 @@ export default props => {
             </Row>
 
             <div> {
-                editTableState === 1 && <div id="reservation-stuff">
-                    <Row noGutters className="text-center align-items-center pizza-cta">
+                editTableState === 1 && <div>
+                    <Row noGutters className="text-center">
                         <Col>
                             <form ref={formRef}>
-                                <h2>Fill in table details</h2>
+                                <h2 cl>Fill in table details</h2>
                                 <label for="tableNumber">Table Number</label>
                                 <input type="text" name="tableNumber"
                                     onChange={addTableNumberChange}/>
@@ -393,8 +398,8 @@ export default props => {
 
             {
             (editTableState === 2 || editTableState === 3) && <>
-                <div id="reservation-stuff">
-                    <Row noGutters className="tables-display">
+                <div>
+                    <Row noGutters className="display-tables">
                         <Col> {
                             getEmptyTables() > 0 ? (
                                 <p className="available-tables">
@@ -410,14 +415,14 @@ export default props => {
                             {
                             getEmptyTables() > 0 ? (
                                 <div>
-                                    <div className="table-key">
-                                        <span className="empty-table"></span>
+                                    <div className="table-legend">
+                                        <span className="occupied-table"></span>
                                         &nbsp; Unoccupied
                                                                                                                                                                                                                             &nbsp;&nbsp;
                                         <span className="awaiting-table"></span>
                                         &nbsp; Awaiting party
                                                                                                                                                                                                                             &nbsp;&nbsp;
-                                        <span className="full-table"></span>
+                                        <span className="unoccupied-table"></span>
                                         &nbsp; Occupied
                                                                                                                                                                                                                             &nbsp;&nbsp;
                                     </div>
@@ -462,8 +467,8 @@ export default props => {
             </>
         }
 
-            <div id="confirm-reservation-stuff">
-                
+        
+            <div>
                 <Modal show={editTable}
                     onHide={handleEditTableClose}>
                     <Modal.Header closeButton>

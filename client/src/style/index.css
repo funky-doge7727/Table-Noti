@@ -1,11 +1,35 @@
-body {
-  font-family: ABeeZee, sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Alegreya&display=swap');
+
+body, html {
+  font-family: Alegreya, sans-serif;
+  height: 100%;
+  background-image: url("sushi.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
+
+#logo {
+
+  display: flex;
+  justify-content: center;
+  
+}
+  
+  
+  #logo-img {
+      height: 200px;
+      width: 400px
+  
+  }
 
 .nav-brand {
   cursor: pointer;
   font-size: 1.5rem;
+  text-align: center;
 }
+
+
 
 @media (min-width: 768px) {
   .nav-brand {
@@ -17,31 +41,15 @@ body {
     font-size: 2.8rem;
   }
 }
-.pizza-slice {
-  font-size: 1.2rem;
-  padding-left: 1.25%;
-  color: #e74c3c;
-}
-
-.pizza-cta {
-  padding-top: 4%;
-}
-
-.looking-for-pizza {
-  font-size: 2.5rem;
-  padding-bottom: 1.8%;
-  padding-right: 3%;
-  padding-left: 3%;
-}
 
 .book-table-btn {
   color: white;
   font-size: 1.2rem;
   padding: 2% 8%;
-  border-radius: 25px;
+  border-radius: 50px;
   background-color: #e74c3c;
   border: 2px white solid;
-  font-family: ABeeZee, sans-serif;
+  font-family: Alegreya, sans-serif;
 }
 .book-table-btn:hover {
   color: #e74c3c;
@@ -55,37 +63,8 @@ body {
     padding: 0.5% 5%;
   }
 }
-.big-img-container {
-  padding: 10% 0;
-}
 
-@media (min-width: 768px) {
-  .big-img-container {
-    padding: 4% 0;
-  }
-}
-.big-img {
-  width: 96%;
-  border-radius: 25px;
-  border-bottom-left-radius: 25px;
-}
-
-.selected-table {
-  font-size: 1.25rem;
-  padding-bottom: 2%;
-}
-
-input[type=date]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  display: none;
-}
-
-input[type=date]::-webkit-calendar-picker-indicator {
-  -webkit-appearance: none;
-  display: none;
-}
-
-.booking-dropdown {
+.button-general {
   width: 85%;
   padding: 4% 0;
   background-color: #e74c3c;
@@ -94,53 +73,45 @@ input[type=date]::-webkit-calendar-picker-indicator {
   font-family: "Roboto";
   font-size: 1.1rem;
   border: none;
-  border-radius: 5px;
+  border-radius: 50px;
   text-align: center;
-}
-.booking-dropdown:hover {
-  background-color: #e74c3c;
-  color: white;
-}
-.booking-dropdown:focus {
-  outline: none;
-  box-shadow: none;
-}
-.booking-dropdown-menu {
-  outline: none;
-}
-.booking-dropdown-item:hover {
-  background-color: white;
-}
-.booking-dropdown-item:active {
-  background-color: white;
-  color: black;
+  font-family: Alegreya, sans-serif;
 }
 
+.button-general.add-table {
+  background-color: #17D7A0;
+}
+
+.button-general.edit-table {
+  background-color: #FBD148;
+}
+
+.button-general.toggle-menu {
+  background-color: #35589A;
+}
+
+
 @media (min-width: 768px) {
-  .booking-dropdown {
+  .button-general {
     font-size: 1.2rem;
   }
 }
-.table-display-message {
-  padding: 2% 0;
-  text-align: center;
-  font-size: 1.3rem;
-  color: white;
-}
 
-.tables-display {
-  background-color: #FF5959;
+.display-tables {
+  background-color: #9D84B7;
   margin: 10% 2%;
   padding: 3% 5%;
   border-radius: 25px;
+  opacity: 100%;
+  font-family: Alegreya, sans-serif;
 }
 
 @media (min-width: 768px) {
-  .tables-display {
+  .display-tables {
     margin: 6% 2.5%;
   }
 }
-.table-key {
+.table-legend {
   padding-top: 1%;
   padding-bottom: 4.5%;
   color: white;
@@ -149,7 +120,7 @@ input[type=date]::-webkit-calendar-picker-indicator {
 .available-tables {
   color: white;
   font-size: 1.2rem;
-  font-family: Roboto, sans-serif;
+  font-family: Alegreya, sans-serif;
 }
 
 .table-container {
@@ -170,11 +141,8 @@ input[type=date]::-webkit-calendar-picker-indicator {
 .selectable-table:hover {
   cursor: pointer;
 }
-.selectable-table:hover-row {
-  padding: 5px;
-}
 
-.full-table {
+.unoccupied-table {
   background-color: #F999B7;
   border: solid 2px white;
   border-radius: 50%;
@@ -190,7 +158,7 @@ input[type=date]::-webkit-calendar-picker-indicator {
   margin: 3px;
 }
 
-.empty-table {
+.occupied-table {
   background-color: #A3DA8D;
   border: solid 2px white;
   border-radius: 50%;
@@ -204,63 +172,3 @@ input[type=date]::-webkit-calendar-picker-indicator {
   padding-top: 15px;
   font-family: Roboto, sans-serif;
 }
-
-.reservation-details-container {
-  padding: 0 4%;
-  padding-bottom: 5%;
-}
-
-.reservation-details {
-  margin: 0 2%;
-  margin-bottom: 5%;
-}
-
-@media (min-width: 768px) {
-  .reservation-details {
-    margin-bottom: 0;
-  }
-}
-.reservation-input:focus {
-  border-color: black;
-  box-shadow: 0 0;
-}
-
-.reservation-error {
-  color: #c0392b;
-  font-size: 1.1rem;
-  padding-bottom: 3%;
-}
-
-.thanks-header {
-  padding: 5% 0;
-  padding-top: 10%;
-  font-size: 2.5rem;
-}
-
-.thanks-subtext {
-  font-size: 1.2rem;
-  padding: 2%;
-}
-
-.thank-you-pizza {
-  font-size: 4rem;
-  color: #e74c3c;
-  padding-bottom: 8%;
-}
-
-@media (min-width: 768px) {
-  .thanks-header {
-    font-size: 5.5rem;
-  }
-
-  .thanks-subtext {
-    font-size: 2.2rem;
-  }
-
-  .thank-you-pizza {
-    font-size: 7rem;
-    padding-bottom: 4%;
-  }
-}
-
-/*# sourceMappingURL=index.css.map */
