@@ -33,8 +33,8 @@ export default props => {
         className={(!props.empty && props.forReserve) ? "table" :"table selectable-table"}
         onClick={_ => {
           props.empty
-            ? props.selectTable(props.name, props.id, true)
-            : props.selectTable(props.name, props.id, false)
+            ? props.selectTable(props.name, props.id)
+            : !props.forReserve && props.selectTable(props.name, props.id)
         }}
       >
         <Row noGutters className="table-row">

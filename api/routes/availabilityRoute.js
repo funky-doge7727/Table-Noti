@@ -8,7 +8,6 @@ const Table = require("../models/tables").model;
 
 const seedData = require("../models/seed")
 
-//// NOT REST COMPLIANT YET!!
 
 // (post) seed data route
 
@@ -20,60 +19,70 @@ router.post("/seed", async function (req, res) {
     await Table.create(seedData, (e, m) => e ? e.message : console.log("seed data created"))
     const io = req.app.get('socketio')
     io.emit('apiCall', {apiCall: 'random'})
-    res.send("seed data created")
+    res.json("seed data created")
 });
 
 // show all tables
 
 router.post("/findall", async function (req, res) {
     const allTables = await Table.find().sort({"tableNumber": 1 })
-    res.send(allTables)
+    res.json(allTables)
 })
 
 
 // check for 1 table
 
 router.post("/findone", async function (req, res) {
-    const table = await Table.findOne({ tableNumber: Number(req.body.tableNumber) }).exec()
-    res.send(table)
+    const table = await Table.findOne({ tableNumber: req.body.tableNumber }).exec()
+    res.json(table)
 })
 
 // create route
 
 router.post("/createone", async function (req, res) {
-    let { tableNumber, capacity } = req.body
-    tableNumber = Number(tableNumber)
-    capacity = Number (capacity)
-    const newData = { tableNumber: tableNumber, capacity: capacity, status: "unoccupied" }
-    await Table.create(newData, (e, m) => e ? e.message : console.log("new table created"))
-    const io = req.app.get('socketio')
-    io.emit('apiCall', {apiCall: 'random'})
-    res.json(newData)
+    const newData = { ...req.body, status: "unoccupied" }
+    console.log(newData)
+    try{
+        await Table.create(newData)
+        const io = req.app.get('socketio')
+        io.emit('apiCall', {apiCall: 'random'})
+        res.json(newData)
+    } catch (e) {
+        res.status(400).json(e)
+    }
+
 })
 
 // update route
 
 router.post("/updateone", async function (req, res) {
     const {tableNumber, newTableNumber, capacity, status} = req.body
-    const table = await Table.findOne({ tableNumber: Number(tableNumber) }).exec()
-    table.tableNumber = newTableNumber
-    table.capacity = capacity
-    table.status = status
+    const table = await Table.findOne({ tableNumber: tableNumber }).exec()
+    if (newTableNumber !== table.tableNumber) {
+        table.tableNumber = newTableNumber || table.tableNumber 
+    }
+    table.capacity = capacity || table.capacity
+    table.status = status || table.status
     console.log(table)
-    await Table.updateOne({ tableNumber: Number(tableNumber)}, table).exec()
-    const io = req.app.get('socketio')
-    io.emit('apiCall', {apiCall: 'random'})
-    res.json(table)
+    try{
+        await Table.updateOne({ tableNumber: tableNumber}, table).exec()
+        const io = req.app.get('socketio')
+        io.emit('apiCall', {apiCall: 'random'})
+        res.json(table)
+    } catch (e) {
+        res.status(400).json(e)
+    }
 })
 
 // delete route
 
 router.post("/deleteone", async function (req, res) {
-    await Table.deleteOne({ tableNumber: Number(req.body.tableNumber) }).exec()
+    await Table.deleteOne({ tableNumber: req.body.tableNumber }).exec()
     const io = req.app.get('socketio')
     io.emit('apiCall', {apiCall: 'random'})
     res.json(`deleted table ${req.body.tableNumber}`)
 })
+
 
 // post route for status change
 
@@ -104,11 +113,11 @@ router.post("/changestatus", async function (req, res) {
         }  
     }
 
-    await Table.updateOne({tableNumber: Number(req.body.tableNumber)}, {status: updateTo}).exec()
+    await Table.updateOne({tableNumber: req.body.tableNumber}, {status: updateTo}).exec()
     table.status = updateTo
     const io = req.app.get('socketio')
     io.emit('apiCall', {apiCall: 'random'})
-    res.send(table)
+    res.json(table)
 })
 
 module.exports = router;

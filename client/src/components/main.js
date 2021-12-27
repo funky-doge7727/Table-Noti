@@ -4,7 +4,7 @@ import {Row, Col, Button} from "reactstrap";
 export default props => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const backEndDomain = "http://localhost:5000"
+    const backEndDomain = process.env.REACT_APP_BACK_END_DOMAIN
   
     const handleUsernameChange = (e) => {
       setUsername(e.target.value);

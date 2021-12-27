@@ -18,11 +18,11 @@ export default props => {
     const socketRef = useRef()
     const formRef = useRef()
 
-    const backEndDomain = process.env.REACT_APP_BACK_END_DOMAIN || "http://localhost:5000"
+    const backEndDomain = process.env.REACT_APP_BACK_END_DOMAIN 
     const defaultTable = {
         table: {
             name: null,
-            id: null
+            id: null,
         }
     }
 
@@ -31,14 +31,11 @@ export default props => {
     const [oneTableToEdit, setOneTableToEdit] = useState([])
     const [show, setShow] = useState(false)
 
-    const oneTable = () => {
-        totalTables.forEach((obj, index) => {
+    const oneTable = async () => {
+        await totalTables.forEach((obj, index) => {
             if (obj.tableNumber === selection.table.name) {
                 const result = [obj.tableNumber, obj.capacity, obj.status]
-                // TO ASK
-                console.log(result)
                 setOneTableToEdit(result)
-                console.log(oneTableToEdit)
                 return result
             }
         })
@@ -48,6 +45,7 @@ export default props => {
     const [addTableSuccessful, setAddTableSuccessful] = useState(false)
     const [editTable, setEditTable] = useState(false)
     const [deleteTable, setDeleteTable] = useState(false)
+    const [duplicatedTable, setDuplicatedTable] = useState(false)
 
     // User's selections
     const [selection, setSelection] = useState(defaultTable)
@@ -92,24 +90,6 @@ export default props => {
         setTotalTables(res);
         console.log(totalTables)
     }
-
-    const callOneTable = async _ => {
-        let res = await fetch(`${backEndDomain}/availability/findone`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${
-                    localStorage.getItem('token')
-                }`
-            },
-            body: JSON.stringify(
-                {tableNumber: selection.table.name}
-            )
-        });
-        res = await res.json();
-        console.log(res)
-        return res.capacity
-    };
 
     // check table availability
 
@@ -163,12 +143,23 @@ export default props => {
                 }`
             },
             body: JSON.stringify(
-                {tableNumber: Number(addTableNumber), capacity: Number(tableCapacityChange)}
+                {tableNumber: addTableNumber, capacity: tableCapacityChange}
             )
         });
-        res = await res.json()
-        setAddTableSuccessful(true)
-        formRef.current.reset()
+        if (res.ok) {
+            res = await res.json()
+            setAddTableSuccessful(true)
+            formRef.current.reset()
+        } else {
+            console.log(res.error)
+            setDuplicatedTable(true)
+        }
+
+     }
+
+    const handleEditTableClose = async (e) => {
+        setEditTable(false)
+        setOneTableToEdit([])
     }
 
     const handleUpdateTableNumber = (e) => {
@@ -197,9 +188,16 @@ export default props => {
                 {tableNumber: selection.table.name, newTableNumber: Number(updateTableNumber), capacity: Number(updateTableCapacity), status: updateTableStatus}
             )
         });
-        res = await res.json()
-        setEditTable(false)
-        formRef.current.reset()
+        if (res.ok) {
+            res = await res.json()
+            setEditTable(false)
+            setOneTableToEdit([])
+            formRef.current.reset()
+        } else {
+            setDuplicatedTable(true) 
+            console.log(res.json())
+        }
+
     }
 
     const handleDeleteTable = async (e) => {
@@ -394,7 +392,6 @@ export default props => {
                         </Modal.Footer>
                     </Modal>
 
-
                 </div>
             } </div>
 
@@ -473,25 +470,22 @@ export default props => {
             <div id="confirm-reservation-stuff">
                 
                 <Modal show={editTable}
-                    onHide={
-                        () => setEditTable(false)
-                }>
+                    onHide={handleEditTableClose}>
                     <Modal.Header closeButton>
                         <Modal.Title>Edit table information</Modal.Title>
                     </Modal.Header>
                     <form ref={formRef}>
                         <h2>Edit details of existing table {selection.table.name} below </h2>
                         <label for="tableNumber">Table Number</label>
-                        <input type="text" name="tableNumber" 
-                            onChange={handleUpdateTableNumber}/>
+                        <input type="number" name="tableNumber" defaultValue={oneTableToEdit[0]}
+                            required onChange={handleUpdateTableNumber}/>
                         <br/>
                         <label for="capacity">Capacity</label>
-                        <input type="text" name="capacity"
-                            onChange={handleUpdateTableCapacity}/>
+                        <input type="number" name="capacity" defaultValue={oneTableToEdit[1]}
+                            required onChange={handleUpdateTableCapacity}/>
                         <br/>
                         <label for="status">Status</label>
-                        <select name="status" onChange={handleUpdateTableStatus}>
-                            <option value=""></option>
+                        <select name="status" required onChange={handleUpdateTableStatus} defaultValue={oneTableToEdit[2]}>
                             <option value="unoccupied">Unoccupied</option>
                             <option value="awaiting party">Awaiting Party</option>
                             <option value="occupied">Occupied</option>
@@ -506,13 +500,29 @@ export default props => {
                             Ok
                         </Button>
                         <Button variant="secondary"
-                            onClick={
-                                () => setEditTable(false)
-                        }>
+                            onClick={handleEditTableClose}>
                             Cancel
                         </Button>
                     </Modal.Footer>
                 </Modal>
+
+                <Modal show={duplicatedTable}
+                        onHide={
+                            () => setDuplicatedTable(false)
+                    }>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Table already existed. </Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>You have keyed in an existing table number. Please choose a different one.</Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="primary"
+                                onClick={
+                                    () => setDuplicatedTable(false)
+                            }>
+                                Ok
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
 
             </div>
 

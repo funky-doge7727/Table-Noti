@@ -6,6 +6,7 @@ const tableSchema = new mongoose.Schema({
   status: {type: String, required: true},
 });
 
+
 const Table = mongoose.model("Table", tableSchema);
 
 module.exports.model = Table;

@@ -18,7 +18,7 @@ export default props => {
     const socketRef = useRef()
     const [totalTables, setTotalTables] = useState([])
     const [show, setShow] = useState(false)
-    const backEndDomain = process.env.REACT_APP_BACK_END_DOMAIN || "http://localhost:5000"
+    const backEndDomain = process.env.REACT_APP_BACK_END_DOMAIN
 
     // User's selections
     const [selection, setSelection] = useState({
@@ -114,7 +114,7 @@ export default props => {
             ...selection,
             table: {
                 name: table_name,
-                id: table_id
+                id: table_id,
             }
         });
     };
