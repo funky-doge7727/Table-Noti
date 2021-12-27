@@ -60,6 +60,8 @@ router.post("/updateone", async function (req, res) {
     const table = await Table.findOne({ tableNumber: tableNumber }).exec()
     if (newTableNumber !== table.tableNumber) {
         table.tableNumber = newTableNumber || table.tableNumber 
+    } else {
+        delete table.tableNumber
     }
     table.capacity = capacity || table.capacity
     table.status = status || table.status

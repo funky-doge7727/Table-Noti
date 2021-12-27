@@ -49,16 +49,6 @@ export default props => {
     // User's selections
     const [selection, setSelection] = useState(defaultTable)
 
-    const handleClose = () => {
-        setShow(false)
-        setSelection({
-            table: {
-                name: null,
-                id: null
-            }
-        })
-    }
-
     // Handle User Logout
 
     const handleClickLogout = () => {
@@ -87,7 +77,7 @@ export default props => {
         });
         res = await res.json();
         setTotalTables(res);
-        console.log(totalTables)
+        // console.log(totalTables)
     }
 
     // check table availability
@@ -184,7 +174,7 @@ export default props => {
                 }`
             },
             body: JSON.stringify(
-                {tableNumber: selection.table.name, newTableNumber: Number(updateTableNumber), capacity: Number(updateTableCapacity), status: updateTableStatus}
+                {tableNumber: selection.table.name, newTableNumber: updateTableNumber, capacity: Number(updateTableCapacity), status: updateTableStatus}
             )
         });
         if (res.ok) {
@@ -286,9 +276,15 @@ export default props => {
         editTableState === 3 && selection.table.id && setDeleteTable(true)
         if (editTableState === 2 && selection.table.id) {
             setEditTable(true)
+            // TO VERIFY
+            setUpdateTableNumber(oneTableToEdit[0])
+            setUpdateTableCapacity(oneTableToEdit[1])
+            setUpdateTableStatus(oneTableToEdit[2])
         }
 
     }, [selection])
+
+
 
 
     // notifications
