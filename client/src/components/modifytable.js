@@ -18,7 +18,7 @@ export default props => {
     const socketRef = useRef()
     const formRef = useRef()
 
-    const backEndDomain = process.env.REACT_APP_BACK_END_DOMAIN 
+    const backEndDomain = process.env.REACT_APP_BACK_END_DOMAIN
     const defaultTable = {
         table: {
             name: null,
@@ -27,7 +27,6 @@ export default props => {
     }
 
     const [totalTables, setTotalTables] = useState([])
-    // const [oneTable, setOneTable] = useState({}) // for editing purposes
     const [oneTableToEdit, setOneTableToEdit] = useState([])
     const [show, setShow] = useState(false)
 
