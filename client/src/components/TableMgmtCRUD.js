@@ -5,13 +5,13 @@ import {
     Row,
     Col,
     Navbar,
-    NavbarBrand,
     Button
 } from "reactstrap"
 
 import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Table from "./Table"
+import Logo from  "./Logo"
 
 
 export default props => {
@@ -162,6 +162,7 @@ export default props => {
     }
 
     const handleUpdateTable = async (e) => {
+        // do not run script if in add (mode 1) and delete (mode 3) mode (i.e. only run script when in edit mode)
         if (editTableState === 1 || editTableState === 3) return 
         e.preventDefault()
         let res = await fetch(`${backEndDomain}/availability/updateone`, {
@@ -289,17 +290,11 @@ export default props => {
 
     }, [selection])
 
-
-
-
     // notifications
 
     return (
         <div>
-            <NavbarBrand className="nav-brand mx-auto">
-                BK Sushi Place - Table Management
-            </NavbarBrand>
-
+            <Logo />
             <Row noGutters className="text-center align-items-center">
 
                 <Navbar color="light" light expand="md"></Navbar>
@@ -354,10 +349,10 @@ export default props => {
 
             <div> {
                 editTableState === 1 && <div>
-                    <Row noGutters className="text-center">
+                    <Row noGutters className="text-center form-interface">
                         <Col>
                             <form ref={formRef}>
-                                <h2 cl>Fill in table details</h2>
+                                <h2>Table Management - Add Table</h2>
                                 <label for="tableNumber">Table Number</label>
                                 <input type="text" name="tableNumber"
                                     onChange={addTableNumberChange}/>
@@ -402,13 +397,13 @@ export default props => {
                     <Row noGutters className="display-tables">
                         <Col> {
                             getEmptyTables() > 0 ? (
-                                <p className="available-tables">
+                                <h2 className="center-title">
                                     {
-                                    `Select tables to 
+                                    `Table Management - Select table to 
                                   ${
                                         editTableState === 2 ? 'edit' : 'delete'
                                     }`
-                                } </p>
+                                } </h2>
                             ) : null
                         }
 

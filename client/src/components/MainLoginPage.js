@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {Row, Col, Button} from "reactstrap";
+import Logo from  "./Logo"
 
 export default props => {
     const [username, setUsername] = useState('');
@@ -41,7 +42,8 @@ export default props => {
 
     return (
         <div>
-            <Row noGutters className="text-center align-items-center pizza-cta">
+          <Logo />
+            <Row noGutters className="text-center form-interface">
                 <Col>
                 <h2>Login</h2>
                     <label for="username">Username</label>

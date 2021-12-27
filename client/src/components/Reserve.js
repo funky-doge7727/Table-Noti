@@ -191,7 +191,7 @@ export default props => {
     return (
         <div>
 
-            <Logo></Logo>
+            <Logo />
             <Row noGutters className="text-center align-items-center">
 
                 <Navbar color="light" light expand="md"></Navbar>
@@ -217,7 +217,11 @@ export default props => {
                             <div>
 
                     <Row noGutters className="display-tables">
-                        <Col> {
+
+                        <Col> 
+                        <h2 className="center-title"> Reservation Menu </h2>
+
+                        {
                             getEmptyTables() > 0 ? (
                                 <p className="available-tables">
                                     {
