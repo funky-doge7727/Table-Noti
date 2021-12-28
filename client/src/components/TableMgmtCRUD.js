@@ -5,14 +5,16 @@ import {
     Row,
     Col,
     Navbar,
-    Button
+    Button,
+    Modal,
+    ModalBody,
+    ModalFooter,
+    ModalHeader,
 } from "reactstrap"
 
-import Modal from 'react-bootstrap/Modal';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Table from "./Table"
 import Logo from  "./Logo"
-
 
 export default props => {
     const socketRef = useRef()
@@ -41,7 +43,9 @@ export default props => {
     // prompts for modals
     const [addTableSuccessful, setAddTableSuccessful] = useState(false)
     const [editTable, setEditTable] = useState(false)
+    const [updateTableComplete, setUpdateTableComplete] = useState(false)
     const [deleteTable, setDeleteTable] = useState(false)
+    const [deleteTableComplete, setDeleteTableComplete] = useState(false)
     const [duplicatedTable, setDuplicatedTable] = useState(false)
 
     // User's selections
@@ -56,13 +60,6 @@ export default props => {
         }
     }
 
-    const getEmptyTables = _ => { // let tables = totalTables.filter(table => table.isAvailable);
-        let tables = totalTables
-        let count = 0
-        tables.forEach(_ => _.status === "unoccupied" && count++)
-        return count;
-    };
-
     const apiCallFunction = async _ => {
         let res = await fetch(`${backEndDomain}/availability/findall`, {
             method: "POST",
@@ -75,7 +72,6 @@ export default props => {
         });
         res = await res.json();
         setTotalTables(res);
-        // console.log(totalTables)
     }
 
     // check table availability
@@ -138,7 +134,6 @@ export default props => {
             setAddTableSuccessful(true)
             formRef.current.reset()
         } else {
-            console.log(res.error)
             setDuplicatedTable(true)
         }
 
@@ -182,16 +177,16 @@ export default props => {
             setEditTable(false)
             setOneTableToEdit([])
             formRef.current.reset()
+            setUpdateTableComplete(true)
         } else {
             setDuplicatedTable(true) 
-            console.log(res.json())
         }
 
     }
 
     const handleDeleteTable = async (e) => {
         e.preventDefault()
-        let res = await fetch(`${backEndDomain}/availability/deleteone`, {
+        await fetch(`${backEndDomain}/availability/deleteone`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -205,14 +200,14 @@ export default props => {
                 }
             )
         });
-        res = await res.json()
         setDeleteTable(false)
         setSelection(defaultTable)
+        setDeleteTableComplete(true)
     }
 
     // Generating tables from available tables state
     const getTables = _ => {
-        if (getEmptyTables() > 0) {
+        if (totalTables) {
             let tables = [];
             totalTables.forEach(table => {
                 if (table.status === "unoccupied") {
@@ -352,7 +347,7 @@ export default props => {
                     <Row noGutters className="text-center form-interface">
                         <Col>
                             <form ref={formRef}>
-                                <h2>Table Management - Add Table</h2>
+                                <h2>Table Management - Add</h2>
                                 <label for="tableNumber">Table Number</label>
                                 <input type="text" name="tableNumber"
                                     onChange={addTableNumberChange}/>
@@ -369,22 +364,22 @@ export default props => {
                         </Col>
                     </Row>
 
-                    <Modal show={addTableSuccessful}
+                    <Modal isOpen={addTableSuccessful}
                         onHide={
                             () => setAddTableSuccessful(false)
                     }>
-                        <Modal.Header closeButton>
-                            <Modal.Title>Add table successful</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>You have successfully added table.</Modal.Body>
-                        <Modal.Footer>
+                        <ModalHeader closeButton>
+                            Add table successful
+                        </ModalHeader>
+                        <ModalBody>You have successfully added table.</ModalBody>
+                        <ModalFooter>
                             <Button variant="primary"
                                 onClick={
                                     () => setAddTableSuccessful(false)
                             }>
                                 Ok
                             </Button>
-                        </Modal.Footer>
+                        </ModalFooter>
                     </Modal>
 
                 </div>
@@ -396,19 +391,19 @@ export default props => {
                 <div>
                     <Row noGutters className="display-tables">
                         <Col> {
-                            getEmptyTables() > 0 ? (
+                            totalTables ? (
                                 <h2 className="center-title">
                                     {
-                                    `Table Management - Select table to 
+                                    `Table Management -  
                                   ${
-                                        editTableState === 2 ? 'edit' : 'delete'
+                                        editTableState === 2 ? 'Edit' : 'Delete'
                                     }`
                                 } </h2>
                             ) : null
                         }
 
                             {
-                            getEmptyTables() > 0 ? (
+                            totalTables ? (
                                 <div>
                                     <div className="table-legend">
                                         <span className="occupied-table"></span>
@@ -434,43 +429,80 @@ export default props => {
                 </div>
 
 
-                <Modal show={deleteTable}
+                <Modal isOpen={deleteTable}
                     onHide={
                         () => setDeleteTable(false)
                 }>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Confirm delete table?</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>{
+                    <ModalHeader toggle={() => setDeleteTable(false)}>
+                        Confirm delete table?
+                    </ModalHeader>
+                    <ModalBody>{
                         `Are you sure you want to delete table ${
                             selection.table.name
                         }?`
-                    }</Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="primary"
+                    }</ModalBody>
+                    <ModalFooter>
+                        <Button className="btn-danger"
                             onClick={handleDeleteTable}>
                             Yes
                         </Button>
-                        <Button variant="secondary"
+                        <Button
                             onClick={
                                 () => setDeleteTable(false)
                         }>
                             Cancel
                         </Button>
-                    </Modal.Footer>
+                    </ModalFooter>
                 </Modal>
+
+                <Modal isOpen={deleteTableComplete}
+                        toggle={
+                            () => setDeleteTableComplete(false)
+                    }>
+                        <ModalHeader toggle={() => setDeleteTableComplete(false)}>
+                            Table deleted.
+                        </ModalHeader>
+                        <ModalBody>Table successfully deleted.</ModalBody>
+                        <ModalFooter>
+                            <Button 
+                                onClick={
+                                    () => setDeleteTableComplete(false)
+                            }>
+                                Ok
+                            </Button>
+                        </ModalFooter>
+                    </Modal>
+
+                    <Modal isOpen={updateTableComplete}
+                        toggle={
+                            () => setUpdateTableComplete(false)
+                    }>
+                        <ModalHeader toggle={() => setUpdateTableComplete(false)}>
+                            Table updated.
+                        </ModalHeader>
+                        <ModalBody>Table successfully updated.</ModalBody>
+                        <ModalFooter>
+                            <Button 
+                                onClick={
+                                    () => setUpdateTableComplete(false)
+                            }>
+                                Ok
+                            </Button>
+                        </ModalFooter>
+                    </Modal>
             </>
         }
 
         
             <div>
-                <Modal show={editTable}
-                    onHide={handleEditTableClose}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Edit table information</Modal.Title>
-                    </Modal.Header>
+                <Modal isOpen={editTable}
+                    toggle={handleEditTableClose}>
+                    <ModalHeader toggle={handleEditTableClose}>
+                        Edit table information
+                    </ModalHeader>
                     <form ref={formRef}>
-                        <h2>Edit details of existing table {selection.table.name} below </h2>
+                        <h3 id="edit-details-text">Edit details of existing table {selection.table.name} below </h3>
+                        <br />
                         <label for="tableNumber">Table Number</label>
                         <input type="number" name="tableNumber" defaultValue={oneTableToEdit[0]}
                             required onChange={handleUpdateTableNumber}/>
@@ -489,8 +521,8 @@ export default props => {
                         <br/>
                     </form>
 
-                    <Modal.Footer>
-                        <Button variant="primary"
+                    <ModalFooter>
+                        <Button className="btn-warning"
                             onClick={handleUpdateTable}>
                             Ok
                         </Button>
@@ -498,25 +530,25 @@ export default props => {
                             onClick={handleEditTableClose}>
                             Cancel
                         </Button>
-                    </Modal.Footer>
+                    </ModalFooter>
                 </Modal>
 
-                <Modal show={duplicatedTable}
-                        onHide={
+                <Modal isOpen={duplicatedTable}
+                        toggle={
                             () => setDuplicatedTable(false)
                     }>
-                        <Modal.Header closeButton>
-                            <Modal.Title>Table already existed. </Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>You have keyed in an existing table number. Please choose a different one.</Modal.Body>
-                        <Modal.Footer>
-                            <Button variant="primary"
+                        <ModalHeader toggle={() => setDuplicatedTable(false)}>
+                            Table already existed. 
+                        </ModalHeader>
+                        <ModalBody>You have keyed in an existing table number. Please choose a different one.</ModalBody>
+                        <ModalFooter>
+                            <Button 
                                 onClick={
                                     () => setDuplicatedTable(false)
                             }>
                                 Ok
                             </Button>
-                        </Modal.Footer>
+                        </ModalFooter>
                     </Modal>
 
             </div>

@@ -5,10 +5,14 @@ import {
     Row,
     Col,
     Navbar,
-    Button 
+    Button,
+    Modal,
+    ModalHeader,
+    ModalFooter,
+    ModalBody 
 } from "reactstrap"
 
-import {Modal} from 'react-bootstrap'
+// import {Modal} from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Table from "./Table"
 import Logo from  "./Logo"
@@ -17,7 +21,7 @@ import Logo from  "./Logo"
 export default props => {
     const socketRef = useRef()
     const [totalTables, setTotalTables] = useState([])
-    const [show, setShow] = useState(false)
+    const [confirmReserve, setConfirmReserve] = useState(false)
     const backEndDomain = process.env.REACT_APP_BACK_END_DOMAIN
 
     // User's selections
@@ -29,7 +33,7 @@ export default props => {
     })
 
     const handleClose = () => {
-      setShow(false)
+      setConfirmReserve(false)
       setSelection({
         table: {
             name: null,
@@ -83,8 +87,7 @@ export default props => {
 
     // Make the reservation
     const reserve = async _ => {
-        console.log(selection)
-        let res = await fetch(`${backEndDomain}/availability/changestatus`, {
+        await fetch(`${backEndDomain}/availability/changestatus`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -96,15 +99,13 @@ export default props => {
                 {tableNumber: selection.table.name, buttonClick: true}
             )
         });
-        res = await res.text();
-        console.log("Reserved: " + res);
         setSelection({
           table: {
               name: null,
               id: null
           }
         })
-        setShow(false)
+        setConfirmReserve(false)
     };
 
 
@@ -122,7 +123,7 @@ export default props => {
 
     // Generating tables from available tables state
     const getTables = _ => {
-        if (getEmptyTables() > 0) {
+        if (totalTables) {
             let tables = [];
             totalTables.forEach(table => {
                 if (table.status === "unoccupied") {
@@ -185,7 +186,7 @@ export default props => {
     }
 
     useEffect (() => {
-      selection.table.id && setShow(true)
+      selection.table.id && setConfirmReserve(true)
   }, [selection])
 
     return (
@@ -222,17 +223,17 @@ export default props => {
                         <h2 className="center-title"> Reservation Menu </h2>
 
                         {
-                            getEmptyTables() > 0 ? (
+                            totalTables ? (
                                 <p className="available-tables">
                                     {
-                                    `${getEmptyTables()} tables available`
+                                    `${getEmptyTables()} ${getEmptyTables() <= 1 ? 'table' : 'tables'}  available`
                                 }
                                      </p>
                             ) : null
                         }
 
                             {
-                            getEmptyTables() > 0 ? (
+                            totalTables ? (
                                 <div>
                                     <div className="table-legend">
                                         <span className="occupied-table"></span>
@@ -258,22 +259,22 @@ export default props => {
                 </div>
 
                 <div>
-                    <Modal show={show}
-                        onHide={handleClose}>
-                        <Modal.Header closeButton>
-                            <Modal.Title>Reserve Table?</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>You are going to reserve table {selection.table.name} </Modal.Body>
-                        <Modal.Footer>
-                            <Button variant="secondary"
+                    <Modal isOpen={confirmReserve}
+                        toggle={handleClose}>
+                        <ModalHeader toggle={handleClose}>
+                            Reserve Table?
+                        </ModalHeader>
+                        <ModalBody>You are going to reserve table {selection.table.name}. Please confirm. </ModalBody>
+                        <ModalFooter>
+                            <Button className="btn-warning"
                                 onClick={reserve}>
                                 Reserve
                             </Button>
-                            <Button variant="primary"
+                            <Button 
                                 onClick={handleClose}>
                                 Cancel
                             </Button>
-                        </Modal.Footer>
+                        </ModalFooter>
                     </Modal>
                 </div>
              </div>
